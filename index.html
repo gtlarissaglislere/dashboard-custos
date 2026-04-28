@@ -98,6 +98,35 @@
   td:first-child { text-align: left; color: var(--title); font-weight: 500; }
   tr:hover td { background: rgba(239,83,80,0.06); }
 
+  /* Filter bar */
+  .filter-bar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    background: var(--panel); border-radius: 12px; padding: 12px 18px;
+    margin-bottom: 20px;
+  }
+  .filter-bar .filter-label {
+    font-size: 0.8em; color: #999; text-transform: uppercase;
+    letter-spacing: 0.5px; margin-right: 4px; font-weight: 600;
+  }
+  .filter-btn {
+    padding: 7px 16px; border-radius: 8px; cursor: pointer;
+    font-size: 0.82em; font-weight: 600; border: 2px solid transparent;
+    transition: all 0.2s; color: #fff;
+  }
+  .filter-btn:hover { filter: brightness(1.2); transform: scale(1.03); }
+  .filter-btn.active { box-shadow: 0 0 12px rgba(255,255,255,0.15); }
+  .filter-btn.inactive { opacity: 0.3; filter: grayscale(0.7); }
+  .filter-btn[data-prod="IT-PROD"] { background: #4fc3f7; color: #000; }
+  .filter-btn[data-prod="BC-PROD"] { background: #66bb6a; color: #000; }
+  .filter-btn[data-prod="GCP-PROD"] { background: #ffa726; color: #000; }
+  .filter-btn[data-prod="PIX-PROD"] { background: #ef5350; }
+  .filter-btn[data-prod="CI-PROD"] { background: #ab47bc; }
+  .filter-btn.active[data-prod="IT-PROD"] { border-color: #4fc3f7; }
+  .filter-btn.active[data-prod="BC-PROD"] { border-color: #66bb6a; }
+  .filter-btn.active[data-prod="GCP-PROD"] { border-color: #ffa726; }
+  .filter-btn.active[data-prod="PIX-PROD"] { border-color: #ef5350; }
+  .filter-btn.active[data-prod="CI-PROD"] { border-color: #ab47bc; }
+
   footer {
     text-align: center; padding: 20px; color: #555; font-size: 0.8em;
     border-top: 1px solid var(--grid); margin-top: 40px;
@@ -121,6 +150,16 @@
 </header>
 
 <div class="container">
+
+  <!-- Filtro por produto -->
+  <div class="filter-bar">
+    <span class="filter-label">Filtrar por produto:</span>
+    <button class="filter-btn active" data-prod="IT-PROD" onclick="toggleFilter(this)">IT-PROD</button>
+    <button class="filter-btn active" data-prod="BC-PROD" onclick="toggleFilter(this)">BC-PROD</button>
+    <button class="filter-btn active" data-prod="GCP-PROD" onclick="toggleFilter(this)">GCP-PROD</button>
+    <button class="filter-btn active" data-prod="PIX-PROD" onclick="toggleFilter(this)">PIX-PROD</button>
+    <button class="filter-btn active" data-prod="CI-PROD" onclick="toggleFilter(this)">CI-PROD</button>
+  </div>
 
   <!-- KPIs -->
   <div class="kpi-grid" id="custos-kpi"></div>
@@ -164,7 +203,7 @@
 </footer>
 
 <script>
-const D = {"custos": {"periodos": ["jan/24", "fev/24", "mar/24", "abr/24", "mai/24", "jun/24", "jul/24", "ago/24", "set/24", "out/24", "nov/24", "dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25", "jul/25", "ago/25", "set/25", "out/25", "nov/25", "dez/25", "jan/26", "fev/26", "mar/26"], "usd": {"IT-PROD": [980.0, 429.0, 439.0, 436.0, 495.0, 649.0, 548.55, 582.0, 571.59, 629.15, 467.55, 669.55, 602.84, 667.55, 757.41, 751.41, 755.79, 724.52, 839.39, 1094.32, 1331.2, 1199.66, 983.91, 1101.52, 1027.09, 967.2, 1532.32], "BC-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 643.13, 0.0, 976.61, 0.0, 1489.93, 1381.88, 2247.12, 2201.3, 2317.01, 3560.09, 5600.63, 7637.23, 8194.45, 11259.24], "GCP-PROD": [456.0, 449.0, 474.0, 744.0, 780.0, 881.0, 1050.69, 924.0, 894.51, 917.0, 648.0, 493.88, 428.51, 401.95, 436.22, 422.44, 432.78, 317.4, 337.53, 352.31, 350.31, 366.68, 354.1, 363.55, 361.57, 333.85, 228.13], "PIX-PROD": [145.0, 174.0, 185.0, 181.0, 193.0, 185.0, 192.55, 193.0, 288.27, 185.08, 142.46, 106.59, 105.13, 136.36, 120.97, 129.67, 133.6, 139.1, 152.61, 156.47, 173.31, 163.68, 173.11, 175.88, 149.54, 134.95, 96.71], "CI-PROD": [100.0, 14.0, 14.0, 14.0, 15.0, 17.0, 16.0, 17.0, 13.66, 12.89, 22.05, 18.97, 15.61, 15.43, 16.16, 17.59, 17.06, 21.02, 16.65, 19.95, 19.95, 18.38, 19.04, 21.83, 19.32, 52.27, 103.82], "Total": [1681.0, 1066.0, 1112.0, 1375.0, 1483.0, 1732.0, 1807.79, 1716.0, 1768.03, 1744.12, 1280.06, 1288.99, 1152.09, 1864.42, 1330.76, 2297.72, 1339.23, 2691.97, 2728.06, 3870.17, 4076.07, 4065.41, 5090.25, 7263.41, 9194.75, 9682.72, 13220.22]}, "brl": {"BC-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8315.0, 7669.43, 12478.71, 11690.88, 12691.89, 19010.88, 30448.39, 41752.74, 42447.25, 58097.68], "GCP-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1771.35, 1873.29, 1956.45, 1860.46, 2008.56, 1890.89, 1976.48, 1976.7, 1729.34, 1177.15], "PIX-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 776.29, 846.99, 868.91, 920.43, 896.59, 924.41, 956.19, 817.54, 699.04, 499.02], "CI-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4160.71, 4751.02, 6187.76, 7175.82, 6672.06, 5355.75, 6107.2, 5720.72, 5280.85, 8442.48], "Totais": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15023.35, 15140.73, 21491.83, 21647.6, 22269.1, 27181.94, 39488.25, 50267.7, 50156.49, 68216.34]}, "dolar": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 5.5808, 5.55, 5.5532, 5.3109, 5.4777, 5.34, 5.4366, 5.467, 5.18, 5.16], "lojas": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 693, 1478, 2288, 2946, 3590, 4200, 5300, 6112, 7321], "custo_loja": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7.2, 1.99, 1.52, 0.96, 0.79, 0.99, 1.33, 1.44, 1.34, 1.54], "evolucao": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 8.06, -6.96, 14.71]}, "gerado_em": "28/04/2026 17:22"};
+const D = {"custos": {"periodos": ["jan/24", "fev/24", "mar/24", "abr/24", "mai/24", "jun/24", "jul/24", "ago/24", "set/24", "out/24", "nov/24", "dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25", "jul/25", "ago/25", "set/25", "out/25", "nov/25", "dez/25", "jan/26", "fev/26", "mar/26"], "usd": {"IT-PROD": [980.0, 429.0, 439.0, 436.0, 495.0, 649.0, 548.55, 582.0, 571.59, 629.15, 467.55, 669.55, 602.84, 667.55, 757.41, 751.41, 755.79, 724.52, 839.39, 1094.32, 1331.2, 1199.66, 983.91, 1101.52, 1027.09, 967.2, 1532.32], "BC-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 643.13, 0.0, 976.61, 0.0, 1489.93, 1381.88, 2247.12, 2201.3, 2317.01, 3560.09, 5600.63, 7637.23, 8194.45, 11259.24], "GCP-PROD": [456.0, 449.0, 474.0, 744.0, 780.0, 881.0, 1050.69, 924.0, 894.51, 917.0, 648.0, 493.88, 428.51, 401.95, 436.22, 422.44, 432.78, 317.4, 337.53, 352.31, 350.31, 366.68, 354.1, 363.55, 361.57, 333.85, 228.13], "PIX-PROD": [145.0, 174.0, 185.0, 181.0, 193.0, 185.0, 192.55, 193.0, 288.27, 185.08, 142.46, 106.59, 105.13, 136.36, 120.97, 129.67, 133.6, 139.1, 152.61, 156.47, 173.31, 163.68, 173.11, 175.88, 149.54, 134.95, 96.71], "CI-PROD": [100.0, 14.0, 14.0, 14.0, 15.0, 17.0, 16.0, 17.0, 13.66, 12.89, 22.05, 18.97, 15.61, 15.43, 16.16, 17.59, 17.06, 21.02, 16.65, 19.95, 19.95, 18.38, 19.04, 21.83, 19.32, 52.27, 103.82], "Total": [1681.0, 1066.0, 1112.0, 1375.0, 1483.0, 1732.0, 1807.79, 1716.0, 1768.03, 1744.12, 1280.06, 1288.99, 1152.09, 1864.42, 1330.76, 2297.72, 1339.23, 2691.97, 2728.06, 3870.17, 4076.07, 4065.41, 5090.25, 7263.41, 9194.75, 9682.72, 13220.22]}, "brl": {"BC-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8315.0, 7669.43, 12478.71, 11690.88, 12691.89, 19010.88, 30448.39, 41752.74, 42447.25, 58097.68], "GCP-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1771.35, 1873.29, 1956.45, 1860.46, 2008.56, 1890.89, 1976.48, 1976.7, 1729.34, 1177.15], "PIX-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 776.29, 846.99, 868.91, 920.43, 896.59, 924.41, 956.19, 817.54, 699.04, 499.02], "CI-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4160.71, 4751.02, 6187.76, 7175.82, 6672.06, 5355.75, 6107.2, 5720.72, 5280.85, 8442.48], "Totais": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15023.35, 15140.73, 21491.83, 21647.6, 22269.1, 27181.94, 39488.25, 50267.7, 50156.49, 68216.34]}, "dolar": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 5.5808, 5.55, 5.5532, 5.3109, 5.4777, 5.34, 5.4366, 5.467, 5.18, 5.16], "lojas": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 693, 1478, 2288, 2946, 3590, 4200, 5300, 6112, 7321], "custo_loja": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7.2, 1.99, 1.52, 0.96, 0.79, 0.99, 1.33, 1.44, 1.34, 1.54], "evolucao": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 8.06, -6.96, 14.71]}, "gerado_em": "28/04/2026 17:59"};
 document.getElementById('updated-at').textContent = D.gerado_em;
 
 const LAYOUT = {
@@ -179,33 +218,60 @@ const LAYOUT = {
 const CFG = { responsive: true, displayModeBar: true, displaylogo: false,
   modeBarButtonsToRemove: ['lasso2d','select2d'] };
 
-(function render() {
+const ALL_PRODS = ['IT-PROD','BC-PROD','GCP-PROD','PIX-PROD','CI-PROD'];
+const ALL_CORES = {'IT-PROD':'#4fc3f7','BC-PROD':'#66bb6a','GCP-PROD':'#ffa726','PIX-PROD':'#ef5350','CI-PROD':'#ab47bc'};
+const BRL_PRODS = ['BC-PROD','GCP-PROD','PIX-PROD','CI-PROD'];
+const BRL_CORES = {'BC-PROD':'#66bb6a','GCP-PROD':'#ffa726','PIX-PROD':'#ef5350','CI-PROD':'#ab47bc'};
+let activeProds = new Set(ALL_PRODS);
+
+function toggleFilter(btn) {
+  const prod = btn.dataset.prod;
+  if (activeProds.has(prod)) {
+    if (activeProds.size === 1) return; // pelo menos 1
+    activeProds.delete(prod);
+    btn.classList.remove('active');
+    btn.classList.add('inactive');
+  } else {
+    activeProds.add(prod);
+    btn.classList.add('active');
+    btn.classList.remove('inactive');
+  }
+  renderAll();
+}
+
+function renderAll() {
   const c = D.custos;
   if (!c || !c.periodos || !c.periodos.length) return;
 
   const P = c.periodos;
-  const coresUsd = ['#4fc3f7','#66bb6a','#ffa726','#ef5350','#ab47bc'];
-  const produtos = ['IT-PROD','BC-PROD','GCP-PROD','PIX-PROD','CI-PROD'];
+  const prods = ALL_PRODS.filter(p => activeProds.has(p));
   const lastIdx = P.length - 1;
-  const totalUsdLast = c.usd.Total[lastIdx];
-  const totalBrlLast = c.brl.Totais[lastIdx];
+
+  // Recalcular totais filtrados
+  const filteredTotalUsd = P.map((_, i) => prods.reduce((s, p) => s + (c.usd[p][i] || 0), 0));
+  const filteredTotalUsdLast = filteredTotalUsd[lastIdx];
+  const filteredTotalUsdPrev = lastIdx > 0 ? filteredTotalUsd[lastIdx - 1] : filteredTotalUsdLast;
+
+  const brlActive = BRL_PRODS.filter(p => activeProds.has(p));
+  const filteredTotalBrl = P.map((_, i) => brlActive.reduce((s, p) => s + (c.brl[p][i] || 0), 0));
+  const filteredTotalBrlLast = filteredTotalBrl[lastIdx];
+
   const lojasLast = c.lojas[lastIdx];
-  const custoLojaLast = c.custo_loja[lastIdx];
+  const custoLojaLast = lojasLast > 0 ? filteredTotalUsdLast / lojasLast : 0;
   const dolarLast = c.dolar.filter(v => v !== null).pop() || 0;
 
-  // Variação USD mês anterior
-  const totalUsdPrev = lastIdx > 0 ? c.usd.Total[lastIdx - 1] : totalUsdLast;
-  const varUsd = totalUsdPrev > 0 ? ((totalUsdLast - totalUsdPrev) / totalUsdPrev * 100) : 0;
+  const varUsd = filteredTotalUsdPrev > 0 ? ((filteredTotalUsdLast - filteredTotalUsdPrev) / filteredTotalUsdPrev * 100) : 0;
   const varSinal = varUsd > 0 ? '▲' : varUsd < 0 ? '▼' : '—';
   const varCor = varUsd > 5 ? 'danger' : varUsd < -5 ? 'ok' : 'warn';
 
   // ── KPIs ──
   const kpiEl = document.getElementById('custos-kpi');
+  kpiEl.innerHTML = '';
   const kpis = [
-    { label: 'Custo Total USD', value: '$' + totalUsdLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
+    { label: 'Custo USD (' + prods.length + ' prod.)', value: '$' + filteredTotalUsdLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
        sub: `${varSinal} ${Math.abs(varUsd).toFixed(1)}% vs mês anterior`, status: varCor },
-    { label: 'Custo Total R$', value: 'R$ ' + totalBrlLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
-       sub: P[lastIdx], status: totalBrlLast > 50000 ? 'danger' : totalBrlLast > 30000 ? 'warn' : 'ok' },
+    { label: 'Custo R$ (filtrado)', value: 'R$ ' + filteredTotalBrlLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
+       sub: P[lastIdx], status: filteredTotalBrlLast > 50000 ? 'danger' : filteredTotalBrlLast > 30000 ? 'warn' : 'ok' },
     { label: 'Lojas Ativas', value: lojasLast.toLocaleString('pt-BR'),
        sub: 'Base total', status: 'ok' },
     { label: 'Custo / Loja (USD)', value: '$' + custoLojaLast.toFixed(2),
@@ -224,38 +290,39 @@ const CFG = { responsive: true, displayModeBar: true, displaylogo: false,
     kpiEl.appendChild(card);
   });
 
-  // ── Total USD line ──
+  // ── Total USD line (filtrado) ──
   Plotly.newPlot('chart-total-usd', [
-    { x: P, y: c.usd.Total, mode: 'lines+markers', name: 'Total USD',
+    { x: P, y: filteredTotalUsd, mode: 'lines+markers', name: 'Total USD',
        line: { color: '#ef5350', width: 3 }, marker: { size: 7 },
        fill: 'tozeroy', fillcolor: 'rgba(239,83,80,0.12)',
-       text: c.usd.Total.map(v => '$'+v.toFixed(2)), textposition: 'top',
+       text: filteredTotalUsd.map(v => '$'+v.toFixed(2)), textposition: 'top',
        hovertemplate: '%{x}<br>Total: $%{y:,.2f}<extra></extra>' },
   ], { ...LAYOUT, yaxis: {...LAYOUT.yaxis, title: 'USD'} }, CFG);
 
-  // ── USD pie ──
-  const lastUsd = produtos.map(p => c.usd[p][lastIdx]);
+  // ── USD pie (filtrado) ──
+  const pieLabels = prods;
+  const pieVals = prods.map(p => c.usd[p][lastIdx]);
+  const pieCores = prods.map(p => ALL_CORES[p]);
   Plotly.newPlot('chart-usd-pie', [{
-    labels: produtos, values: lastUsd, type: 'pie', hole: 0.5,
-    marker: { colors: coresUsd }, textinfo: 'label+percent', textfont: { size: 10 },
+    labels: pieLabels, values: pieVals, type: 'pie', hole: 0.5,
+    marker: { colors: pieCores }, textinfo: 'label+percent', textfont: { size: 10 },
     hovertemplate: '%{label}: $%{value:,.2f}<extra></extra>',
   }], { ...LAYOUT,
-    annotations: [{ text: '$'+totalUsdLast.toFixed(0), showarrow: false, font: { size: 22, color: '#fff' } }],
+    annotations: [{ text: '$'+filteredTotalUsdLast.toFixed(0), showarrow: false, font: { size: 22, color: '#fff' } }],
   }, CFG);
 
-  // ── USD stacked ──
-  const usdTraces = produtos.map((p, i) => ({
+  // ── USD stacked (filtrado) ──
+  const usdTraces = prods.map(p => ({
     x: P, y: c.usd[p], type: 'bar', name: p,
-    marker: { color: coresUsd[i], cornerradius: 2 },
+    marker: { color: ALL_CORES[p], cornerradius: 2 },
     hovertemplate: `${p}: $%{y:,.2f}<extra></extra>`,
   }));
   Plotly.newPlot('chart-usd-stack', usdTraces,
     { ...LAYOUT, barmode: 'stack', yaxis: {...LAYOUT.yaxis, title: 'USD'} }, CFG);
 
-  // ── BRL total ──
-  const brlTotais = c.brl.Totais;
-  const brlP = P.filter((_, i) => brlTotais[i] > 0);
-  const brlV = brlTotais.filter(v => v > 0);
+  // ── BRL total (filtrado) ──
+  const brlP = P.filter((_, i) => filteredTotalBrl[i] > 0);
+  const brlV = filteredTotalBrl.filter(v => v > 0);
   if (brlV.length) {
     Plotly.newPlot('chart-brl-total', [
       { x: brlP, y: brlV, type: 'bar',
@@ -264,26 +331,26 @@ const CFG = { responsive: true, displayModeBar: true, displaylogo: false,
          textposition: 'outside', textfont: { color: '#fff', size: 10 },
          hovertemplate: '%{x}<br>R$ %{y:,.2f}<extra></extra>' },
     ], { ...LAYOUT, yaxis: {...LAYOUT.yaxis, title: 'R$'} }, CFG);
-  }
+  } else { Plotly.purge('chart-brl-total'); }
 
-  // ── BRL pie ──
-  const brlProds = ['BC-PROD','GCP-PROD','PIX-PROD','CI-PROD'];
-  const lastBrl = brlProds.map(p => c.brl[p][lastIdx]);
-  if (lastBrl.some(v => v > 0)) {
+  // ── BRL pie (filtrado) ──
+  const brlPieLabels = brlActive;
+  const brlPieVals = brlActive.map(p => c.brl[p][lastIdx]);
+  if (brlPieVals.some(v => v > 0)) {
     Plotly.newPlot('chart-brl-pie', [{
-      labels: brlProds, values: lastBrl, type: 'pie', hole: 0.5,
-      marker: { colors: ['#66bb6a','#ffa726','#ef5350','#ab47bc'] },
+      labels: brlPieLabels, values: brlPieVals, type: 'pie', hole: 0.5,
+      marker: { colors: brlActive.map(p => BRL_CORES[p]) },
       textinfo: 'label+percent', textfont: { size: 10 },
       hovertemplate: '%{label}: R$ %{value:,.2f}<extra></extra>',
     }], { ...LAYOUT,
-      annotations: [{ text: 'R$'+totalBrlLast.toLocaleString('pt-BR', {minimumFractionDigits:0}), showarrow: false, font: { size: 18, color: '#fff' } }],
+      annotations: [{ text: 'R$'+filteredTotalBrlLast.toLocaleString('pt-BR', {minimumFractionDigits:0}), showarrow: false, font: { size: 18, color: '#fff' } }],
     }, CFG);
-  }
+  } else { Plotly.purge('chart-brl-pie'); }
 
-  // ── Histórico custo por loja ──
-  const custoLojaHist = c.custo_loja;
-  const clP = P.filter((_, i) => custoLojaHist[i] > 0);
-  const clV = custoLojaHist.filter(v => v > 0);
+  // ── Histórico custo por loja (recalculado com filtro) ──
+  const filteredCustoLoja = P.map((_, i) => c.lojas[i] > 0 ? filteredTotalUsd[i] / c.lojas[i] : 0);
+  const clP = P.filter((_, i) => filteredCustoLoja[i] > 0);
+  const clV = filteredCustoLoja.filter(v => v > 0);
   if (clV.length) {
     const cores = clV.map(v => v > 3 ? '#ef5350' : v > 1.5 ? '#ffa726' : '#66bb6a');
     Plotly.newPlot('chart-loja-hist', [
@@ -296,12 +363,12 @@ const CFG = { responsive: true, displayModeBar: true, displaylogo: false,
          line: { color: '#fff', width: 1, dash: 'dot' }, showlegend: false,
          hoverinfo: 'skip' },
     ], { ...LAYOUT, yaxis: {...LAYOUT.yaxis, title: 'USD / loja'}, showlegend: false }, CFG);
-  }
+  } else { Plotly.purge('chart-loja-hist'); }
 
-  // ── Custo por loja vs lojas (dual axis) ──
+  // ── Custo por loja vs lojas (dual axis, filtrado) ──
   const lojasP = P.filter((_, i) => c.lojas[i] > 0);
   const lojasV = c.lojas.filter(v => v > 0);
-  const custoL = c.custo_loja.filter((_, i) => c.lojas[i] > 0);
+  const custoL = filteredCustoLoja.filter((_, i) => c.lojas[i] > 0);
   if (lojasV.length) {
     Plotly.newPlot('chart-loja-dual', [
       { x: lojasP, y: lojasV, type: 'bar', name: 'Qtd Lojas', yaxis: 'y2',
@@ -333,30 +400,31 @@ const CFG = { responsive: true, displayModeBar: true, displaylogo: false,
     ], { ...LAYOUT, yaxis: {...LAYOUT.yaxis, title: 'R$/USD'} }, CFG);
   }
 
-  // ── Tabela detalhada ──
+  // ── Tabela detalhada (filtrada) ──
   const thead = document.getElementById('tabela-head');
   const tbody = document.getElementById('tabela-body');
-  const cols = ['Período','IT-PROD','BC-PROD','GCP-PROD','PIX-PROD','CI-PROD','Total USD','Lojas','$/Loja'];
+  const cols = ['Período', ...prods, 'Total USD', 'Lojas', '$/Loja'];
   thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+  tbody.innerHTML = '';
 
-  // Mostrar do mais recente para mais antigo
   for (let i = lastIdx; i >= 0; i--) {
     const tr = document.createElement('tr');
+    const rowTotal = prods.reduce((s, p) => s + (c.usd[p][i] || 0), 0);
+    const rowCustoLoja = c.lojas[i] > 0 ? rowTotal / c.lojas[i] : 0;
     const vals = [
       P[i],
-      '$' + c.usd['IT-PROD'][i].toFixed(2),
-      '$' + c.usd['BC-PROD'][i].toFixed(2),
-      '$' + c.usd['GCP-PROD'][i].toFixed(2),
-      '$' + c.usd['PIX-PROD'][i].toFixed(2),
-      '$' + c.usd['CI-PROD'][i].toFixed(2),
-      '<strong>$' + c.usd.Total[i].toFixed(2) + '</strong>',
+      ...prods.map(p => '$' + (c.usd[p][i] || 0).toFixed(2)),
+      '<strong>$' + rowTotal.toFixed(2) + '</strong>',
       c.lojas[i] > 0 ? c.lojas[i].toLocaleString('pt-BR') : '—',
-      c.custo_loja[i] > 0 ? '$' + c.custo_loja[i].toFixed(2) : '—',
+      rowCustoLoja > 0 ? '$' + rowCustoLoja.toFixed(2) : '—',
     ];
     tr.innerHTML = vals.map(v => `<td>${v}</td>`).join('');
     tbody.appendChild(tr);
   }
-})();
+}
+
+// Render inicial
+renderAll();
 </script>
 </body>
 </html>
