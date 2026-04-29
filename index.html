@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Custos de Infraestrutura — Connect Hub</title>
+<title>Custos BC-PROD — Connect Hub</title>
 <script>/**
 * plotly.js v2.32.0
 * Copyright 2012-2024, Plotly, Inc.
@@ -15,7 +15,7 @@
 <style>
   :root {
     --bg: #0f1117; --panel: #1a1d27; --panel2: #222639;
-    --text: #e0e0e0; --title: #ffffff; --accent: #ef5350;
+    --text: #e0e0e0; --title: #ffffff; --accent: #66bb6a;
     --ok: #66bb6a; --warn: #ffa726; --danger: #ef5350;
     --grid: #2a2d37; --border: #333;
   }
@@ -24,6 +24,40 @@
     background: var(--bg); color: var(--text);
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   }
+
+  /* Login */
+  #login-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: var(--panel); border-radius: 16px; padding: 48px 40px;
+    max-width: 400px; width: 90%; text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    border: 1px solid var(--grid);
+  }
+  .login-box h2 { color: var(--title); font-size: 1.5em; margin-bottom: 8px; }
+  .login-box h2 span { color: var(--accent); }
+  .login-sub { color: #888; font-size: 0.85em; margin-bottom: 28px; }
+  .login-input {
+    width: 100%; padding: 14px 16px; border-radius: 10px;
+    border: 2px solid var(--grid); background: var(--bg); color: var(--text);
+    font-size: 1em; outline: none; transition: border-color 0.2s;
+  }
+  .login-input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%; padding: 14px; border-radius: 10px; border: none;
+    background: var(--accent); color: #000; font-size: 1em; font-weight: 700;
+    cursor: pointer; margin-top: 16px; transition: filter 0.2s;
+  }
+  .login-btn:hover { filter: brightness(1.15); }
+  .login-error { color: var(--danger); font-size: 0.85em; margin-top: 12px; min-height: 1.2em; }
+  .login-footer { color: #555; font-size: 0.7em; margin-top: 24px; }
+
+  /* Dashboard */
+  #app-content { display: none; }
+
   header {
     background: linear-gradient(135deg, #1a1d27 0%, #222639 100%);
     padding: 24px 30px; border-bottom: 2px solid var(--accent);
@@ -34,6 +68,13 @@
   header h1 span { color: var(--accent); }
   .header-info { font-size: 0.85em; color: #888; text-align: right; }
   .header-info .update { color: var(--ok); font-weight: 600; }
+  .header-actions { margin-top: 6px; }
+  .logout-btn {
+    padding: 6px 14px; border-radius: 6px; border: 1px solid #555;
+    background: transparent; color: #999; font-size: 0.75em; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--danger); color: var(--danger); }
 
   .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
 
@@ -72,7 +113,7 @@
     border-bottom: 1px solid var(--grid);
   }
   .chart-title .badge {
-    display: inline-block; background: var(--accent); color: #fff;
+    display: inline-block; background: var(--accent); color: #000;
     border-radius: 4px; padding: 2px 8px; font-size: 0.8em;
     margin-right: 6px; font-weight: 700;
   }
@@ -85,7 +126,6 @@
   }
   .section-header:first-child { margin-top: 0; }
 
-  /* Table */
   .table-wrapper { overflow-x: auto; background: var(--panel); border-radius: 12px; padding: 16px; }
   table { width: 100%; border-collapse: collapse; font-size: 0.82em; }
   th {
@@ -96,36 +136,7 @@
   th:first-child { text-align: left; }
   td { padding: 8px; border-bottom: 1px solid var(--grid); text-align: right; }
   td:first-child { text-align: left; color: var(--title); font-weight: 500; }
-  tr:hover td { background: rgba(239,83,80,0.06); }
-
-  /* Filter bar */
-  .filter-bar {
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-    background: var(--panel); border-radius: 12px; padding: 12px 18px;
-    margin-bottom: 20px;
-  }
-  .filter-bar .filter-label {
-    font-size: 0.8em; color: #999; text-transform: uppercase;
-    letter-spacing: 0.5px; margin-right: 4px; font-weight: 600;
-  }
-  .filter-btn {
-    padding: 7px 16px; border-radius: 8px; cursor: pointer;
-    font-size: 0.82em; font-weight: 600; border: 2px solid transparent;
-    transition: all 0.2s; color: #fff;
-  }
-  .filter-btn:hover { filter: brightness(1.2); transform: scale(1.03); }
-  .filter-btn.active { box-shadow: 0 0 12px rgba(255,255,255,0.15); }
-  .filter-btn.inactive { opacity: 0.3; filter: grayscale(0.7); }
-  .filter-btn[data-prod="IT-PROD"] { background: #4fc3f7; color: #000; }
-  .filter-btn[data-prod="BC-PROD"] { background: #66bb6a; color: #000; }
-  .filter-btn[data-prod="GCP-PROD"] { background: #ffa726; color: #000; }
-  .filter-btn[data-prod="PIX-PROD"] { background: #ef5350; }
-  .filter-btn[data-prod="CI-PROD"] { background: #ab47bc; }
-  .filter-btn.active[data-prod="IT-PROD"] { border-color: #4fc3f7; }
-  .filter-btn.active[data-prod="BC-PROD"] { border-color: #66bb6a; }
-  .filter-btn.active[data-prod="GCP-PROD"] { border-color: #ffa726; }
-  .filter-btn.active[data-prod="PIX-PROD"] { border-color: #ef5350; }
-  .filter-btn.active[data-prod="CI-PROD"] { border-color: #ab47bc; }
+  tr:hover td { background: rgba(102,187,106,0.06); }
 
   footer {
     text-align: center; padding: 20px; color: #555; font-size: 0.8em;
@@ -141,53 +152,52 @@
 </head>
 <body>
 
+<!-- Login -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h2>🔒 <span>Connect Hub</span></h2>
+    <p class="login-sub">Dashboard de Custos BC-PROD · Acesso restrito</p>
+    <input type="password" id="pwd-input" class="login-input" placeholder="Digite a senha"
+           autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="pwd-error"></div>
+    <div class="login-footer">Trier Sistemas · Diretoria</div>
+  </div>
+</div>
+
+<!-- Dashboard -->
+<div id="app-content">
+
 <header>
-  <h1>💰 <span>Custos de Infraestrutura</span> — Connect Hub</h1>
+  <h1>💰 <span>Custos BC-PROD</span> — Connect Hub</h1>
   <div class="header-info">
-    <div>Servidores de Produção · IT · BC · GCP · PIX · CI</div>
+    <div>Servidor de Produção · BC-PROD</div>
     <div class="update">Atualizado: <span id="updated-at"></span></div>
+    <div class="header-actions"><button class="logout-btn" onclick="doLogout()">Sair</button></div>
   </div>
 </header>
 
 <div class="container">
 
-  <!-- Filtro por produto -->
-  <div class="filter-bar">
-    <span class="filter-label">Filtrar por produto:</span>
-    <button class="filter-btn active" data-prod="IT-PROD" onclick="toggleFilter(this)">IT-PROD</button>
-    <button class="filter-btn active" data-prod="BC-PROD" onclick="toggleFilter(this)">BC-PROD</button>
-    <button class="filter-btn active" data-prod="GCP-PROD" onclick="toggleFilter(this)">GCP-PROD</button>
-    <button class="filter-btn active" data-prod="PIX-PROD" onclick="toggleFilter(this)">PIX-PROD</button>
-    <button class="filter-btn active" data-prod="CI-PROD" onclick="toggleFilter(this)">CI-PROD</button>
-  </div>
-
-  <!-- KPIs -->
   <div class="kpi-grid" id="custos-kpi"></div>
 
-  <!-- Custo por Loja (primeiro!) -->
   <div class="section-header">Custo por Loja — BC-PROD</div>
   <div class="charts-grid">
-    <div class="chart-card full"><div class="chart-title"><span class="badge">📊</span>Histórico do Custo por Loja BC-PROD (USD) — com variação %</div><div id="chart-loja-hist"></div></div>
-    <div class="chart-card wide"><div class="chart-title"><span class="badge">📊</span>Custo por Loja vs. Quantidade de Lojas (BC-PROD)</div><div id="chart-loja-dual"></div></div>
+    <div class="chart-card full"><div class="chart-title"><span class="badge">📊</span>Histórico do Custo por Loja (USD) — com variação %</div><div id="chart-loja-hist"></div></div>
+    <div class="chart-card wide"><div class="chart-title"><span class="badge">📊</span>Custo por Loja vs. Quantidade de Lojas</div><div id="chart-loja-dual"></div></div>
     <div class="chart-card"><div class="chart-title"><span class="badge">💱</span>Cotação do Dólar</div><div id="chart-dolar"></div></div>
   </div>
 
-  <!-- Custos em USD -->
-  <div class="section-header">Custos Totais em USD</div>
+  <div class="section-header">Custo BC-PROD em USD</div>
   <div class="charts-grid">
-    <div class="chart-card full"><div class="chart-title"><span class="badge">$</span>Evolução do Custo Total (USD) — com variação %</div><div id="chart-total-usd"></div></div>
-    <div class="chart-card wide"><div class="chart-title"><span class="badge">$</span>Custo USD por Produto — Histórico Empilhado</div><div id="chart-usd-stack"></div></div>
-    <div class="chart-card"><div class="chart-title"><span class="badge">$</span>Composição por Produto (Último Mês)</div><div id="chart-usd-pie"></div></div>
+    <div class="chart-card full"><div class="chart-title"><span class="badge">$</span>Evolução do Custo BC-PROD (USD) — com variação %</div><div id="chart-bc-usd"></div></div>
   </div>
 
-  <!-- Custos em R$ -->
-  <div class="section-header">Custos em R$ (convertido)</div>
+  <div class="section-header">Custo BC-PROD em R$</div>
   <div class="charts-grid">
-    <div class="chart-card wide"><div class="chart-title"><span class="badge">R$</span>Custo Total Mensal (R$)</div><div id="chart-brl-total"></div></div>
-    <div class="chart-card"><div class="chart-title"><span class="badge">R$</span>Composição em R$ (Último Mês)</div><div id="chart-brl-pie"></div></div>
+    <div class="chart-card full"><div class="chart-title"><span class="badge">R$</span>Custo BC-PROD Mensal (R$)</div><div id="chart-bc-brl"></div></div>
   </div>
 
-  <!-- Tabela detalhada -->
   <div class="section-header">Detalhamento Mensal</div>
   <div class="table-wrapper">
     <table id="tabela-custos">
@@ -199,12 +209,50 @@
 </div>
 
 <footer>
-  Dashboard de Custos — Connect Hub · Trier Sistemas · Gerado automaticamente
+  Dashboard de Custos BC-PROD — Connect Hub · Trier Sistemas · Gerado automaticamente
 </footer>
 
+</div>
+
 <script>
-const D = {"custos": {"periodos": ["jan/24", "fev/24", "mar/24", "abr/24", "mai/24", "jun/24", "jul/24", "ago/24", "set/24", "out/24", "nov/24", "dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25", "jul/25", "ago/25", "set/25", "out/25", "nov/25", "dez/25", "jan/26", "fev/26", "mar/26"], "usd": {"IT-PROD": [980.0, 429.0, 439.0, 436.0, 495.0, 649.0, 548.55, 582.0, 571.59, 629.15, 467.55, 669.55, 602.84, 667.55, 757.41, 751.41, 755.79, 724.52, 839.39, 1094.32, 1331.2, 1199.66, 983.91, 1101.52, 1027.09, 967.2, 1532.32], "BC-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 643.13, 0.0, 976.61, 0.0, 1489.93, 1381.88, 2247.12, 2201.3, 2317.01, 3560.09, 5600.63, 7637.23, 8194.45, 11259.24], "GCP-PROD": [456.0, 449.0, 474.0, 744.0, 780.0, 881.0, 1050.69, 924.0, 894.51, 917.0, 648.0, 493.88, 428.51, 401.95, 436.22, 422.44, 432.78, 317.4, 337.53, 352.31, 350.31, 366.68, 354.1, 363.55, 361.57, 333.85, 228.13], "PIX-PROD": [145.0, 174.0, 185.0, 181.0, 193.0, 185.0, 192.55, 193.0, 288.27, 185.08, 142.46, 106.59, 105.13, 136.36, 120.97, 129.67, 133.6, 139.1, 152.61, 156.47, 173.31, 163.68, 173.11, 175.88, 149.54, 134.95, 96.71], "CI-PROD": [100.0, 14.0, 14.0, 14.0, 15.0, 17.0, 16.0, 17.0, 13.66, 12.89, 22.05, 18.97, 15.61, 15.43, 16.16, 17.59, 17.06, 21.02, 16.65, 19.95, 19.95, 18.38, 19.04, 21.83, 19.32, 52.27, 103.82], "Total": [1681.0, 1066.0, 1112.0, 1375.0, 1483.0, 1732.0, 1807.79, 1716.0, 1768.03, 1744.12, 1280.06, 1288.99, 1152.09, 1864.42, 1330.76, 2297.72, 1339.23, 2691.97, 2728.06, 3870.17, 4076.07, 4065.41, 5090.25, 7263.41, 9194.75, 9682.72, 13220.22]}, "brl": {"BC-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8315.0, 7669.43, 12478.71, 11690.88, 12691.89, 19010.88, 30448.39, 41752.74, 42447.25, 58097.68], "GCP-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1771.35, 1873.29, 1956.45, 1860.46, 2008.56, 1890.89, 1976.48, 1976.7, 1729.34, 1177.15], "PIX-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 776.29, 846.99, 868.91, 920.43, 896.59, 924.41, 956.19, 817.54, 699.04, 499.02], "CI-PROD": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 4160.71, 4751.02, 6187.76, 7175.82, 6672.06, 5355.75, 6107.2, 5720.72, 5280.85, 8442.48], "Totais": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 15023.35, 15140.73, 21491.83, 21647.6, 22269.1, 27181.94, 39488.25, 50267.7, 50156.49, 68216.34]}, "dolar": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 5.5808, 5.55, 5.5532, 5.3109, 5.4777, 5.34, 5.4366, 5.467, 5.18, 5.16], "lojas": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 693, 1478, 2288, 2946, 3590, 4200, 5300, 6112, 7321], "custo_loja": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7.2, 1.99, 1.52, 0.96, 0.79, 0.99, 1.33, 1.44, 1.34, 1.54], "evolucao": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 8.06, -6.96, 14.71]}, "gerado_em": "28/04/2026 18:16"};
-document.getElementById('updated-at').textContent = D.gerado_em;
+const D = {"data": {"periodos": ["jan/24", "fev/24", "mar/24", "abr/24", "mai/24", "jun/24", "jul/24", "ago/24", "set/24", "out/24", "nov/24", "dez/24", "jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25", "jul/25", "ago/25", "set/25", "out/25", "nov/25", "dez/25", "jan/26", "fev/26", "mar/26"], "bc_usd": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 643.13, 0.0, 976.61, 0.0, 1489.93, 1381.88, 2247.12, 2201.3, 2317.01, 3560.09, 5600.63, 7637.23, 8194.45, 11259.24], "bc_brl": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8315.0, 7669.43, 12478.71, 11690.88, 12691.89, 19010.88, 30448.39, 41752.74, 42447.25, 58097.68], "dolar": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 5.5808, 5.55, 5.5532, 5.3109, 5.4777, 5.34, 5.4366, 5.467, 5.18, 5.16], "lojas": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 207, 693, 1478, 2288, 2946, 3590, 4200, 5300, 6112, 7321], "custo_loja": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7.2, 1.99, 1.52, 0.96, 0.79, 0.99, 1.33, 1.44, 1.34, 1.54], "evolucao": [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, 8.06, -6.96, 14.71]}, "gerado_em": "29/04/2026 00:53"};
+const HASH = 'e3ddffce831e28abb73a44b6a9aabb597033532034eced7975311797973a4397';
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (!pwd) { document.getElementById('pwd-error').textContent = 'Digite a senha'; return; }
+  const h = await sha256(pwd);
+  if (h === HASH) {
+    sessionStorage.setItem('custos_auth', '1');
+    showDashboard();
+  } else {
+    document.getElementById('pwd-error').textContent = 'Senha incorreta';
+    document.getElementById('pwd-input').value = '';
+    document.getElementById('pwd-input').focus();
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('custos_auth');
+  document.getElementById('app-content').style.display = 'none';
+  document.getElementById('login-overlay').style.display = 'flex';
+  document.getElementById('pwd-input').value = '';
+  document.getElementById('pwd-error').textContent = '';
+}
+
+function showDashboard() {
+  document.getElementById('login-overlay').style.display = 'none';
+  document.getElementById('app-content').style.display = 'block';
+  document.getElementById('updated-at').textContent = D.gerado_em;
+  renderAll();
+}
+
+if (sessionStorage.getItem('custos_auth') === '1') { showDashboard(); }
 
 const LAYOUT = {
   paper_bgcolor: '#1a1d27', plot_bgcolor: '#1a1d27',
@@ -218,68 +266,42 @@ const LAYOUT = {
 const CFG = { responsive: true, displayModeBar: true, displaylogo: false,
   modeBarButtonsToRemove: ['lasso2d','select2d'] };
 
-const ALL_PRODS = ['IT-PROD','BC-PROD','GCP-PROD','PIX-PROD','CI-PROD'];
-const ALL_CORES = {'IT-PROD':'#4fc3f7','BC-PROD':'#66bb6a','GCP-PROD':'#ffa726','PIX-PROD':'#ef5350','CI-PROD':'#ab47bc'};
-const BRL_PRODS = ['BC-PROD','GCP-PROD','PIX-PROD','CI-PROD'];
-const BRL_CORES = {'BC-PROD':'#66bb6a','GCP-PROD':'#ffa726','PIX-PROD':'#ef5350','CI-PROD':'#ab47bc'};
-let activeProds = new Set(ALL_PRODS);
-
-function toggleFilter(btn) {
-  const prod = btn.dataset.prod;
-  if (activeProds.has(prod)) {
-    if (activeProds.size === 1) return; // pelo menos 1
-    activeProds.delete(prod);
-    btn.classList.remove('active');
-    btn.classList.add('inactive');
-  } else {
-    activeProds.add(prod);
-    btn.classList.add('active');
-    btn.classList.remove('inactive');
-  }
-  renderAll();
-}
-
 function renderAll() {
-  const c = D.custos;
-  if (!c || !c.periodos || !c.periodos.length) return;
+  const d = D.data;
+  if (!d || !d.periodos || !d.periodos.length) return;
 
-  const P = c.periodos;
-  const prods = ALL_PRODS.filter(p => activeProds.has(p));
-  const lastIdx = P.length - 1;
+  const P = d.periodos;
+  const last = P.length - 1;
+  const bcUsd = d.bc_usd;
+  const bcBrl = d.bc_brl;
 
-  // Recalcular totais filtrados
-  const filteredTotalUsd = P.map((_, i) => prods.reduce((s, p) => s + (c.usd[p][i] || 0), 0));
-  const filteredTotalUsdLast = filteredTotalUsd[lastIdx];
-  const filteredTotalUsdPrev = lastIdx > 0 ? filteredTotalUsd[lastIdx - 1] : filteredTotalUsdLast;
+  const bcLast = bcUsd[last];
+  const bcPrev = last > 0 ? bcUsd[last - 1] : bcLast;
+  const varPct = bcPrev > 0 ? ((bcLast - bcPrev) / bcPrev * 100) : 0;
+  const varSinal = varPct > 0 ? '▲' : varPct < 0 ? '▼' : '—';
+  const varCor = varPct > 5 ? 'danger' : varPct < -5 ? 'ok' : 'warn';
 
-  const brlActive = BRL_PRODS.filter(p => activeProds.has(p));
-  const filteredTotalBrl = P.map((_, i) => brlActive.reduce((s, p) => s + (c.brl[p][i] || 0), 0));
-  const filteredTotalBrlLast = filteredTotalBrl[lastIdx];
+  const brlLast = bcBrl[last];
+  const lojasLast = d.lojas[last];
+  const custoLojaLast = d.custo_loja[last];
+  const dolarLast = d.dolar.filter(v => v !== null).pop() || 0;
 
-  const lojasLast = c.lojas[lastIdx];
-  const custoLojaLast = c.custo_loja[lastIdx];
-  const dolarLast = c.dolar.filter(v => v !== null).pop() || 0;
-
-  const varUsd = filteredTotalUsdPrev > 0 ? ((filteredTotalUsdLast - filteredTotalUsdPrev) / filteredTotalUsdPrev * 100) : 0;
-  const varSinal = varUsd > 0 ? '▲' : varUsd < 0 ? '▼' : '—';
-  const varCor = varUsd > 5 ? 'danger' : varUsd < -5 ? 'ok' : 'warn';
-
-  // ── KPIs ──
+  // KPIs
   const kpiEl = document.getElementById('custos-kpi');
   kpiEl.innerHTML = '';
   const kpis = [
-    { label: 'Custo USD (' + prods.length + ' prod.)', value: '$' + filteredTotalUsdLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
-       sub: `${varSinal} ${Math.abs(varUsd).toFixed(1)}% vs mês anterior`, status: varCor },
-    { label: 'Custo R$ (filtrado)', value: 'R$ ' + filteredTotalBrlLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
-       sub: P[lastIdx], status: filteredTotalBrlLast > 50000 ? 'danger' : filteredTotalBrlLast > 30000 ? 'warn' : 'ok' },
-    { label: 'Lojas Ativas (BC-PROD)', value: lojasLast.toLocaleString('pt-BR'),
-       sub: 'Apenas BC-PROD', status: 'ok' },
-    { label: 'Custo / Loja BC-PROD', value: '$' + custoLojaLast.toFixed(2),
+    { label: 'BC-PROD (USD)', value: '$' + bcLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
+       sub: `${varSinal} ${Math.abs(varPct).toFixed(1)}% vs mês anterior`, status: varCor },
+    { label: 'BC-PROD (R$)', value: 'R$ ' + brlLast.toLocaleString('pt-BR', {minimumFractionDigits:2}),
+       sub: P[last], status: brlLast > 50000 ? 'danger' : brlLast > 30000 ? 'warn' : 'ok' },
+    { label: 'Lojas Ativas', value: lojasLast.toLocaleString('pt-BR'),
+       sub: 'Base BC-PROD', status: 'ok' },
+    { label: 'Custo / Loja (USD)', value: '$' + custoLojaLast.toFixed(2),
        sub: custoLojaLast > 3 ? 'Acima do ideal' : custoLojaLast > 1.5 ? 'Atenção' : 'Dentro da meta',
        status: custoLojaLast > 3 ? 'danger' : custoLojaLast > 1.5 ? 'warn' : 'ok' },
     { label: 'Cotação Dólar', value: 'R$ ' + dolarLast.toFixed(4),
        sub: 'Última cotação', status: 'ok' },
-    { label: 'Referência', value: P[lastIdx],
+    { label: 'Referência', value: P[last],
        sub: `${P.length} meses de histórico`, status: 'ok' },
   ];
   kpis.forEach(k => {
@@ -290,109 +312,23 @@ function renderAll() {
     kpiEl.appendChild(card);
   });
 
-  // ── Total USD line (filtrado) com % variação ──
-  const usdVarPct = filteredTotalUsd.map((v, i) => {
-    if (i === 0 || filteredTotalUsd[i-1] === 0) return null;
-    return ((v - filteredTotalUsd[i-1]) / filteredTotalUsd[i-1] * 100);
-  });
-  const usdAnnotations = usdVarPct.map((pct, i) => {
-    if (pct === null) return null;
-    const sinal = pct > 0 ? '▲' : pct < 0 ? '▼' : '';
-    const cor = pct > 5 ? '#ef5350' : pct < -5 ? '#66bb6a' : '#ffa726';
-    return {
-      x: P[i], y: filteredTotalUsd[i], text: `${sinal}${Math.abs(pct).toFixed(1)}%`,
-      showarrow: false, font: { size: 9, color: cor, family: 'Segoe UI' },
-      yshift: 18, xshift: 0,
-    };
-  }).filter(a => a !== null);
-  Plotly.newPlot('chart-total-usd', [
-    { x: P, y: filteredTotalUsd, mode: 'lines+markers', name: 'Total USD',
-       line: { color: '#ef5350', width: 3 }, marker: { size: 7 },
-       fill: 'tozeroy', fillcolor: 'rgba(239,83,80,0.12)',
-       text: filteredTotalUsd.map((v, i) => {
-         let t = '$'+v.toFixed(2);
-         if (usdVarPct[i] !== null) t += ' (' + (usdVarPct[i] > 0 ? '+' : '') + usdVarPct[i].toFixed(1) + '%)';
-         return t;
-       }),
-       hovertemplate: '%{x}<br>Total: $%{y:,.2f}<br>%{text}<extra></extra>' },
-  ], { ...LAYOUT, height: 420, yaxis: {...LAYOUT.yaxis, title: 'USD'}, annotations: usdAnnotations }, CFG);
-
-  // ── USD pie (filtrado) ──
-  const pieLabels = prods;
-  const pieVals = prods.map(p => c.usd[p][lastIdx]);
-  const pieCores = prods.map(p => ALL_CORES[p]);
-  Plotly.newPlot('chart-usd-pie', [{
-    labels: pieLabels, values: pieVals, type: 'pie', hole: 0.5,
-    marker: { colors: pieCores }, textinfo: 'label+percent', textfont: { size: 10 },
-    hovertemplate: '%{label}: $%{value:,.2f}<extra></extra>',
-  }], { ...LAYOUT,
-    annotations: [{ text: '$'+filteredTotalUsdLast.toFixed(0), showarrow: false, font: { size: 22, color: '#fff' } }],
-  }, CFG);
-
-  // ── USD stacked (filtrado) ──
-  const usdTraces = prods.map(p => ({
-    x: P, y: c.usd[p], type: 'bar', name: p,
-    marker: { color: ALL_CORES[p], cornerradius: 2 },
-    hovertemplate: `${p}: $%{y:,.2f}<extra></extra>`,
-  }));
-  Plotly.newPlot('chart-usd-stack', usdTraces,
-    { ...LAYOUT, barmode: 'stack', yaxis: {...LAYOUT.yaxis, title: 'USD'} }, CFG);
-
-  // ── BRL total (filtrado) ──
-  const brlP = P.filter((_, i) => filteredTotalBrl[i] > 0);
-  const brlV = filteredTotalBrl.filter(v => v > 0);
-  if (brlV.length) {
-    Plotly.newPlot('chart-brl-total', [
-      { x: brlP, y: brlV, type: 'bar',
-         marker: { color: brlV.map(v => v > 50000 ? '#ef5350' : v > 30000 ? '#ffa726' : '#66bb6a'), cornerradius: 4 },
-         text: brlV.map(v => 'R$ '+v.toLocaleString('pt-BR', {minimumFractionDigits:0})),
-         textposition: 'outside', textfont: { color: '#fff', size: 10 },
-         hovertemplate: '%{x}<br>R$ %{y:,.2f}<extra></extra>' },
-    ], { ...LAYOUT, yaxis: {...LAYOUT.yaxis, title: 'R$'} }, CFG);
-  } else { Plotly.purge('chart-brl-total'); }
-
-  // ── BRL pie (filtrado) ──
-  const brlPieLabels = brlActive;
-  const brlPieVals = brlActive.map(p => c.brl[p][lastIdx]);
-  if (brlPieVals.some(v => v > 0)) {
-    Plotly.newPlot('chart-brl-pie', [{
-      labels: brlPieLabels, values: brlPieVals, type: 'pie', hole: 0.5,
-      marker: { colors: brlActive.map(p => BRL_CORES[p]) },
-      textinfo: 'label+percent', textfont: { size: 10 },
-      hovertemplate: '%{label}: R$ %{value:,.2f}<extra></extra>',
-    }], { ...LAYOUT,
-      annotations: [{ text: 'R$'+filteredTotalBrlLast.toLocaleString('pt-BR', {minimumFractionDigits:0}), showarrow: false, font: { size: 18, color: '#fff' } }],
-    }, CFG);
-  } else { Plotly.purge('chart-brl-pie'); }
-
-  // ── Histórico custo por loja (BC-PROD apenas) + % variação ──
-  const bcCustoLoja = P.map((_, i) => c.lojas[i] > 0 ? c.usd['BC-PROD'][i] / c.lojas[i] : 0);
+  // Custo por Loja historico
+  const bcCustoLoja = P.map((_, i) => d.lojas[i] > 0 ? bcUsd[i] / d.lojas[i] : 0);
   const clP = P.filter((_, i) => bcCustoLoja[i] > 0);
   const clV = bcCustoLoja.filter(v => v > 0);
   if (clV.length) {
     const cores = clV.map(v => v > 3 ? '#ef5350' : v > 1.5 ? '#ffa726' : '#66bb6a');
-    // Calcular variação % mês a mês
-    const lojaVarPct = clV.map((v, i) => {
+    const lojaVar = clV.map((v, i) => {
       if (i === 0 || clV[i-1] === 0) return null;
       return ((v - clV[i-1]) / clV[i-1] * 100);
     });
-    const lojaLabels = clV.map((v, i) => {
-      let t = '$' + v.toFixed(2);
-      if (lojaVarPct[i] !== null) {
-        const pct = lojaVarPct[i];
-        const sinal = pct > 0 ? '▲' : pct < 0 ? '▼' : '';
-        t += '\n' + sinal + Math.abs(pct).toFixed(1) + '%';
-      }
-      return t;
-    });
-    const lojaAnnotations = lojaVarPct.map((pct, i) => {
+    const lojaAnn = lojaVar.map((pct, i) => {
       if (pct === null) return null;
-      const sinal = pct > 0 ? '▲' : pct < 0 ? '▼' : '';
-      const cor = pct > 10 ? '#ef5350' : pct < -10 ? '#66bb6a' : '#ffa726';
+      const s = pct > 0 ? '▲' : pct < 0 ? '▼' : '';
+      const c = pct > 10 ? '#ef5350' : pct < -10 ? '#66bb6a' : '#ffa726';
       return {
-        x: clP[i], y: clV[i], text: `${sinal}${Math.abs(pct).toFixed(1)}%`,
-        showarrow: false, font: { size: 9, color: cor, family: 'Segoe UI' },
-        yshift: 28,
+        x: clP[i], y: clV[i], text: `${s}${Math.abs(pct).toFixed(1)}%`,
+        showarrow: false, font: { size: 9, color: c, family: 'Segoe UI' }, yshift: 28,
       };
     }).filter(a => a !== null);
     Plotly.newPlot('chart-loja-hist', [
@@ -402,19 +338,18 @@ function renderAll() {
          textposition: 'outside', textfont: { color: '#ccc', size: 10 },
          hovertemplate: clV.map((v, i) => {
            let h = clP[i] + '<br>Custo/Loja: $' + v.toFixed(2);
-           if (lojaVarPct[i] !== null) h += '<br>Variação: ' + (lojaVarPct[i] > 0 ? '+' : '') + lojaVarPct[i].toFixed(1) + '%';
+           if (lojaVar[i] !== null) h += '<br>Variação: ' + (lojaVar[i] > 0 ? '+' : '') + lojaVar[i].toFixed(1) + '%';
            return h + '<extra></extra>';
          }) },
       { x: clP, y: clV, mode: 'lines', name: 'Tendência',
-         line: { color: '#fff', width: 1, dash: 'dot' }, showlegend: false,
-         hoverinfo: 'skip' },
-    ], { ...LAYOUT, height: 420, yaxis: {...LAYOUT.yaxis, title: 'USD / loja'}, showlegend: false, annotations: lojaAnnotations }, CFG);
-  } else { Plotly.purge('chart-loja-hist'); }
+         line: { color: '#fff', width: 1, dash: 'dot' }, showlegend: false, hoverinfo: 'skip' },
+    ], { ...LAYOUT, height: 420, yaxis: {...LAYOUT.yaxis, title: 'USD / loja'}, showlegend: false, annotations: lojaAnn }, CFG);
+  }
 
-  // ── Custo por loja vs lojas (dual axis, BC-PROD) ──
-  const lojasP = P.filter((_, i) => c.lojas[i] > 0);
-  const lojasV = c.lojas.filter(v => v > 0);
-  const custoL = bcCustoLoja.filter((_, i) => c.lojas[i] > 0);
+  // Custo por loja vs Qtd lojas
+  const lojasP = P.filter((_, i) => d.lojas[i] > 0);
+  const lojasV = d.lojas.filter(v => v > 0);
+  const custoL = bcCustoLoja.filter((_, i) => d.lojas[i] > 0);
   if (lojasV.length) {
     Plotly.newPlot('chart-loja-dual', [
       { x: lojasP, y: lojasV, type: 'bar', name: 'Qtd Lojas', yaxis: 'y2',
@@ -422,8 +357,7 @@ function renderAll() {
          hovertemplate: '%{x}: %{y} lojas<extra></extra>' },
       { x: lojasP, y: custoL, mode: 'lines+markers', name: 'Custo/Loja ($)',
          line: { color: '#ef5350', width: 3 }, marker: { size: 8, symbol: 'diamond' },
-         text: custoL.map(v => '$'+v.toFixed(2)), textposition: 'top',
-         textfont: { color: '#ef5350', size: 11 },
+         text: custoL.map(v => '$'+v.toFixed(2)),
          hovertemplate: '%{x}: $%{y:.2f}/loja<extra></extra>' },
     ], { ...LAYOUT,
       yaxis: { ...LAYOUT.yaxis, title: 'Custo/Loja (USD)', side: 'left' },
@@ -433,9 +367,9 @@ function renderAll() {
     }, CFG);
   }
 
-  // ── Cotação dólar ──
-  const dolarP = P.filter((_, i) => c.dolar[i] !== null);
-  const dolarV = c.dolar.filter(v => v !== null);
+  // Cotacao dolar
+  const dolarP = P.filter((_, i) => d.dolar[i] !== null);
+  const dolarV = d.dolar.filter(v => v !== null);
   if (dolarV.length) {
     Plotly.newPlot('chart-dolar', [
       { x: dolarP, y: dolarV, mode: 'lines+markers', name: 'Cotação',
@@ -446,31 +380,72 @@ function renderAll() {
     ], { ...LAYOUT, yaxis: {...LAYOUT.yaxis, title: 'R$/USD'} }, CFG);
   }
 
-  // ── Tabela detalhada (filtrada) ──
+  // BC-PROD USD
+  const bcVarPct = bcUsd.map((v, i) => {
+    if (i === 0 || bcUsd[i-1] === 0) return null;
+    return ((v - bcUsd[i-1]) / bcUsd[i-1] * 100);
+  });
+  const bcP = P.filter((_, i) => bcUsd[i] > 0);
+  const bcV = bcUsd.filter(v => v > 0);
+  const bcVarF = bcUsd.reduce((acc, v, i) => { if (v > 0) acc.push(bcVarPct[i]); return acc; }, []);
+  const bcAnn = bcVarF.map((pct, i) => {
+    if (pct === null) return null;
+    const s = pct > 0 ? '▲' : pct < 0 ? '▼' : '';
+    const c = pct > 5 ? '#ef5350' : pct < -5 ? '#66bb6a' : '#ffa726';
+    return {
+      x: bcP[i], y: bcV[i], text: `${s}${Math.abs(pct).toFixed(1)}%`,
+      showarrow: false, font: { size: 9, color: c, family: 'Segoe UI' }, yshift: 18,
+    };
+  }).filter(a => a !== null);
+  if (bcV.length) {
+    Plotly.newPlot('chart-bc-usd', [
+      { x: bcP, y: bcV, mode: 'lines+markers', name: 'BC-PROD USD',
+         line: { color: '#66bb6a', width: 3 }, marker: { size: 7 },
+         fill: 'tozeroy', fillcolor: 'rgba(102,187,106,0.12)',
+         text: bcV.map((v, i) => {
+           let t = '$'+v.toFixed(2);
+           if (bcVarF[i] !== null) t += ' (' + (bcVarF[i] > 0 ? '+' : '') + bcVarF[i].toFixed(1) + '%)';
+           return t;
+         }),
+         hovertemplate: '%{x}<br>BC-PROD: $%{y:,.2f}<br>%{text}<extra></extra>' },
+    ], { ...LAYOUT, height: 420, yaxis: {...LAYOUT.yaxis, title: 'USD'}, annotations: bcAnn }, CFG);
+  }
+
+  // BC-PROD BRL
+  const brlP = P.filter((_, i) => bcBrl[i] > 0);
+  const brlV = bcBrl.filter(v => v > 0);
+  if (brlV.length) {
+    Plotly.newPlot('chart-bc-brl', [
+      { x: brlP, y: brlV, type: 'bar',
+         marker: { color: brlV.map(v => v > 50000 ? '#ef5350' : v > 30000 ? '#ffa726' : '#66bb6a'), cornerradius: 4 },
+         text: brlV.map(v => 'R$ '+v.toLocaleString('pt-BR', {minimumFractionDigits:0})),
+         textposition: 'outside', textfont: { color: '#fff', size: 10 },
+         hovertemplate: '%{x}<br>R$ %{y:,.2f}<extra></extra>' },
+    ], { ...LAYOUT, height: 420, yaxis: {...LAYOUT.yaxis, title: 'R$'} }, CFG);
+  }
+
+  // Tabela
   const thead = document.getElementById('tabela-head');
   const tbody = document.getElementById('tabela-body');
-  const cols = ['Período', ...prods, 'Total USD', 'Lojas', '$/Loja'];
+  const cols = ['Período', 'BC-PROD (USD)', 'BC-PROD (R$)', 'Dólar', 'Lojas', '$/Loja'];
   thead.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
   tbody.innerHTML = '';
 
-  for (let i = lastIdx; i >= 0; i--) {
+  for (let i = last; i >= 0; i--) {
     const tr = document.createElement('tr');
-    const rowTotal = prods.reduce((s, p) => s + (c.usd[p][i] || 0), 0);
-    const rowCustoLoja = c.lojas[i] > 0 ? rowTotal / c.lojas[i] : 0;
+    const cl = d.lojas[i] > 0 ? bcUsd[i] / d.lojas[i] : 0;
     const vals = [
       P[i],
-      ...prods.map(p => '$' + (c.usd[p][i] || 0).toFixed(2)),
-      '<strong>$' + rowTotal.toFixed(2) + '</strong>',
-      c.lojas[i] > 0 ? c.lojas[i].toLocaleString('pt-BR') : '—',
-      rowCustoLoja > 0 ? '$' + rowCustoLoja.toFixed(2) : '—',
+      '$' + bcUsd[i].toFixed(2),
+      bcBrl[i] > 0 ? 'R$ ' + bcBrl[i].toLocaleString('pt-BR', {minimumFractionDigits:2}) : '—',
+      d.dolar[i] !== null ? 'R$ ' + d.dolar[i].toFixed(4) : '—',
+      d.lojas[i] > 0 ? d.lojas[i].toLocaleString('pt-BR') : '—',
+      cl > 0 ? '$' + cl.toFixed(2) : '—',
     ];
     tr.innerHTML = vals.map(v => `<td>${v}</td>`).join('');
     tbody.appendChild(tr);
   }
 }
-
-// Render inicial
-renderAll();
 </script>
 </body>
 </html>
